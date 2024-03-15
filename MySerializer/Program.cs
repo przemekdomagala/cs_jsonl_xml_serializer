@@ -1,18 +1,22 @@
 ﻿using System.Xml.Serialization;
+using System.Text.Json;
 using Newtonsoft.Json;
 
 public class Program{
     public static void Main(){
-        String jsonString = File.ReadAllText("jsonl_files\\favorite-tweets.jsonl");
-        Tweets tweets = tweetsReader(jsonString);
+        String jsonString = File.ReadAllText("json_files\\data.json");
+        Tweets tweets = JsonConvert.DeserializeObject<Tweets>(jsonString);
+        Console.WriteLine(tweets.Data[0].ToString());
+        
         var path = "xml_files\\tweets.xml";
         File.WriteAllText(path, "");
+        Console.WriteLine("\nxmlSerializer Function works:\n");
         xmlSerializer(tweets);
+        xmlSerializer(tweets, true, 5);
         
         tweets.sortByUsernames();
         Console.WriteLine("Alphabetically last user's tweet:\n"+tweets.Data[tweets.Data.Count-1].ToString()+"\n");
         Console.WriteLine("Alphabetically first user's tweet:\n"+tweets.Data[0].ToString()+"\n");
-        
         
         tweets.sortByDate();
         Console.WriteLine("Newest tweet:\n"+tweets.Data[tweets.Data.Count-1].ToString()+"\n");
@@ -28,21 +32,6 @@ public class Program{
         tweets.wordsFrequency(true);
         Console.WriteLine("IDF calculated for ten highest values:\n");
         tweets.idfCalculator();
-    }
-
-    public static Tweets tweetsReader(String content){
-        Tweets tweets = new Tweets();
-        var jsonReader = new JsonTextReader(new StringReader(content)){
-            SupportMultipleContent = true
-        };
-
-        var jsonSerializer = new JsonSerializer();
-        while (jsonReader.Read())
-        {
-            Tweet ?tweet = jsonSerializer.Deserialize<Tweet>(jsonReader);
-            tweets.Data.Add(tweet);
-        }
-        return tweets;
     }
 
     public static void xmlSerializer(Tweets ?tweets = null, bool readFromFile = false, int index = -1){
